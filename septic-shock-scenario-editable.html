@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paediatric Septic Shock — Scenario Document</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --page:     #F8F5EF;
+  --page2:    #F2EDE4;
+  --ink:      #1A1612;
+  --ink-soft: #4A4540;
+  --ink-muted:#8A857D;
+  --navy:     #0C2340;
+  --navy-mid: #1A3A5C;
+  --teal:     #1A6B60;
+  --burgundy: #7B1D2E;
+  --amber:    #B85C00;
+  --amber-lt: #FEF3E2;
+  --rule:     #D4CABC;
+  --white:    #FFFFFF;
+  --edit-hl:  rgba(255, 200, 0, 0.12);
+  --edit-border: #F0B400;
+  --delete-red: #C0392B;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Source Serif 4', Georgia, serif;
+  background: var(--page2);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* ── EDIT TOOLBAR ── */
+#edit-toolbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  background: var(--navy);
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+.tb-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  margin-right: 4px;
+}
+.tb-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 7px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.tb-btn:hover { transform: translateY(-1px); }
+#toggleEditBtn {
+  background: #F0B400;
+  color: #1A1612;
+}
+#toggleEditBtn.active { background: #2ECC71; color: #fff; }
+#downloadBtn {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+#downloadBtn:hover { background: rgba(255,255,255,0.18); }
+#restoreBtn {
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.6);
+  border: 1px solid rgba(255,255,255,0.15);
+  display: none;
+}
+#restoreBtn.visible { display: flex; }
+.tb-hint {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: rgba(255,255,255,0.3);
+  margin-left: auto;
+}
+.tb-sep {
+  width: 1px; height: 24px;
+  background: rgba(255,255,255,0.15);
+}
+.deleted-count {
+  background: var(--delete-red);
+  color: #fff;
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* ── RESTORE PANEL ── */
+#restore-panel {
+  display: none;
+  position: fixed;
+  top: 56px; right: 24px;
+  background: var(--navy);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 16px;
+  z-index: 999;
+  min-width: 280px;
+  max-width: 340px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+#restore-panel.visible { display: block; }
+#restore-panel h4 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 12px;
+}
+.restore-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+}
+.restore-item button {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: none;
+  background: #2ECC71;
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── PAGE WRAPPER ── */
+.page-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  background: var(--page);
+  min-height: 100vh;
+  box-shadow: 0 0 40px rgba(0,0,0,0.12);
+  margin-top: 56px; /* toolbar height */
+}
+
+/* ── EDIT MODE: EDITABLE BLOCKS ── */
+body.edit-mode .editable {
+  position: relative;
+  cursor: default;
+  transition: background 0.15s, outline 0.15s;
+}
+body.edit-mode .editable:hover {
+  background: var(--edit-hl) !important;
+  outline: 1.5px dashed var(--edit-border);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+body.edit-mode .editable:hover .delete-btn {
+  display: flex;
+}
+body.edit-mode .editable:hover .edit-text-btn {
+  display: flex;
+}
+
+/* Delete overlay button */
+.delete-btn {
+  display: none;
+  position: absolute;
+  top: 4px; right: 4px;
+  z-index: 50;
+  background: var(--delete-red);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 4px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  align-items: center;
+  gap: 5px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  white-space: nowrap;
+}
+.delete-btn:hover { background: #A93226; }
+
+/* Edit text button */
+.edit-text-btn {
+  display: none;
+  position: absolute;
+  top: 4px; right: 80px;
+  z-index: 50;
+  background: #2980B9;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 4px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  align-items: center;
+  gap: 5px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  white-space: nowrap;
+}
+
+/* ── DOCUMENT HEADER ── */
+.doc-header {
+  background: var(--navy);
+  padding: 36px 48px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.doc-header .eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+}
+.doc-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 36px;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.1;
+}
+.doc-header .doc-sub {
+  font-size: 14px;
+  color: rgba(255,255,255,0.45);
+  font-style: italic;
+  margin-top: 4px;
+}
+.doc-header .meta-row {
+  display: flex;
+  gap: 28px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.meta-item .mi-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  display: block;
+  margin-bottom: 2px;
+}
+.meta-item .mi-val { font-size: 13px; color: rgba(255,255,255,0.75); }
+.doc-body { padding: 40px 48px 64px; }
+
+/* ── SECTION BLOCK ── */
+.section-block { margin-bottom: 40px; position: relative; }
+.section-title-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--rule);
+}
+.section-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--ink-muted);
+  background: var(--page2);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 3px 9px;
+  white-space: nowrap;
+}
+.section-title-bar h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--navy);
+}
+h3 {
+  font-family: 'Source Serif 4', serif;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--teal);
+  margin: 20px 0 10px;
+}
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  margin: 10px 0 18px;
+}
+.doc-table th {
+  background: var(--navy);
+  color: #fff;
+  padding: 9px 14px;
+  text-align: left;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.doc-table td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-soft);
+  vertical-align: top;
+}
+.doc-table tr:last-child td { border-bottom: none; }
+.doc-table tr:nth-child(even) td { background: rgba(0,0,0,0.02); }
+.doc-table td strong { color: var(--ink); }
+.callout-box {
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  overflow: visible;
+  margin-bottom: 18px;
+  position: relative;
+}
+.callout-box-header {
+  padding: 9px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #fff;
+  border-radius: 7px 7px 0 0;
+}
+.cbh-teal { background: var(--teal); }
+.cbh-navy { background: var(--navy); }
+.cbh-burgundy { background: var(--burgundy); }
+.cbh-amber { background: var(--amber); }
+.callout-box-body {
+  padding: 14px 18px;
+  background: var(--white);
+  font-size: 14px;
+  color: var(--ink-soft);
+  line-height: 1.65;
+  border-radius: 0 0 7px 7px;
+}
+.callout-box-body p { margin-bottom: 6px; }
+.callout-box-body p:last-child { margin-bottom: 0; }
+.callout-box-body ul { margin-left: 18px; }
+.callout-box-body li { margin-bottom: 4px; }
+.states-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  margin: 10px 0 18px;
+}
+.states-table th {
+  background: var(--navy);
+  color: #fff;
+  padding: 10px 14px;
+  text-align: left;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.states-table td {
+  padding: 12px 14px;
+  border: 1px solid var(--rule);
+  vertical-align: top;
+  color: var(--ink-soft);
+  line-height: 1.55;
+  position: relative;
+}
+.states-table tr:nth-child(odd) td { background: rgba(26,107,96,0.04); }
+.states-table tr:nth-child(even) td { background: var(--white); }
+.state-name {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--navy);
+  margin-bottom: 6px;
+}
+.state-vitals {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-muted);
+}
+.state-vitals span { display: block; }
+.col-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--teal);
+  font-weight: 600;
+  margin-bottom: 4px;
+  display: block;
+}
+.col-label-trigger { color: var(--amber); }
+.col-label-modifier { color: var(--burgundy); }
+.action-list, .trigger-list, .modifier-list {
+  list-style: none; padding: 0; margin: 0;
+}
+.action-list li::before { content: '✓ '; color: var(--teal); font-weight: 700; }
+.trigger-list li::before { content: '→ '; color: var(--amber); font-weight: 700; }
+.modifier-list li::before { content: '⚡ '; }
+.action-list li, .trigger-list li, .modifier-list li { margin-bottom: 4px; font-size: 13px; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+.check-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.check-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 12px; font-size: 13px; color: var(--ink-soft);
+  border-bottom: 1px solid var(--rule); border-right: 1px solid var(--rule);
+  background: var(--white); position: relative;
+}
+.check-item:nth-child(3n) { border-right: none; }
+.check-item.checked { color: var(--ink); font-weight: 600; }
+.check-box {
+  width: 14px; height: 14px; border: 1.5px solid var(--rule);
+  border-radius: 3px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 9px;
+}
+.check-box.ticked { background: var(--teal); border-color: var(--teal); color: #fff; }
+.kv-row {
+  display: flex; gap: 8px; padding: 7px 0;
+  border-bottom: 1px solid var(--rule); font-size: 14px;
+  align-items: flex-start; position: relative;
+}
+.kv-row:last-child { border-bottom: none; }
+.kv-key {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;
+  color: var(--ink-muted); min-width: 160px; flex-shrink: 0;
+  padding-top: 1px; letter-spacing: 0.5px;
+}
+.kv-val { color: var(--ink-soft); }
+.kv-val strong { color: var(--ink); }
+.vitals-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 12px 0; }
+.vital-card { background: var(--white); border: 1px solid var(--rule); border-radius: 7px; padding: 10px 12px; position: relative; }
+.vc-param { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 3px; }
+.vc-val { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--burgundy); line-height: 1.1; }
+.vc-note { font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
+.debrief-q {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 12px 0; border-bottom: 1px solid var(--rule);
+  font-size: 14px; color: var(--ink-soft); line-height: 1.6; position: relative;
+}
+.debrief-q:last-child { border-bottom: none; }
+.dq-num { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--rule); line-height: 1; min-width: 24px; flex-shrink: 0; }
+.key-moment {
+  display: flex; align-items: center; gap: 12px; padding: 11px 16px;
+  border-left: 3px solid var(--amber); background: var(--amber-lt);
+  border-radius: 0 6px 6px 0; margin-bottom: 8px; font-size: 14px;
+  font-weight: 600; color: var(--navy); position: relative;
+}
+.timing-strip {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0;
+  border: 1px solid var(--rule); border-radius: 7px; overflow: hidden; margin: 10px 0;
+}
+.timing-item { padding: 14px 18px; text-align: center; border-right: 1px solid var(--rule); background: var(--white); }
+.timing-item:last-child { border-right: none; }
+.ti-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 4px; }
+.ti-val { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--navy); }
+.obj-row { display: grid; grid-template-columns: 160px 1fr; gap: 0; border-bottom: 1px solid var(--rule); }
+.obj-row:last-child { border-bottom: none; }
+.obj-label { padding: 10px 14px; background: var(--page2); font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-muted); font-weight: 600; border-right: 1px solid var(--rule); display: flex; align-items: flex-start; }
+.obj-content { padding: 10px 14px; font-size: 13.5px; color: var(--ink-soft); line-height: 1.55; }
+.obj-content ul { margin-left: 16px; margin-top: 4px; }
+.obj-content li { margin-bottom: 3px; }
+.doc-footer {
+  background: var(--page2); border-top: 1px solid var(--rule); padding: 16px 48px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-muted); letter-spacing: 0.5px;
+}
+.page-divider { border: none; border-top: 1px dashed var(--rule); margin: 40px 0; }
+
+/* ── INLINE TEXT EDITOR ── */
+#inline-editor {
+  display: none;
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2000;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  width: 560px;
+  max-width: 92vw;
+  overflow: hidden;
+}
+#inline-editor.visible { display: block; }
+.ie-header {
+  background: var(--navy);
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ie-header span {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.6);
+}
+.ie-close {
+  background: none; border: none; color: rgba(255,255,255,0.5);
+  font-size: 18px; cursor: pointer; line-height: 1;
+}
+.ie-close:hover { color: #fff; }
+#edit-textarea {
+  width: 100%;
+  min-height: 140px;
+  padding: 16px 20px;
+  font-family: 'Source Serif 4', serif;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ink);
+  border: none;
+  resize: vertical;
+  outline: none;
+}
+.ie-footer {
+  padding: 12px 20px;
+  background: var(--page2);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid var(--rule);
+}
+.ie-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+.ie-btn-cancel { background: var(--rule); color: var(--ink); }
+.ie-btn-save { background: var(--teal); color: #fff; }
+#editor-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1999;
+}
+#editor-overlay.visible { display: block; }
+
+@media print {
+  /* ── Hide all editing UI ── */
+  #edit-toolbar,
+  #restore-panel,
+  #inline-editor,
+  #editor-overlay,
+  .delete-btn,
+  .edit-text-btn { display: none !important; }
+
+  /* ── Page setup ── */
+  @page {
+    size: A4;
+    margin: 18mm 16mm 18mm 16mm;
+  }
+  @page :first {
+    margin-top: 0; /* header bleeds to top on first page */
+  }
+
+  /* ── Reset screen layout ── */
+  html, body { background: white !important; }
+  .page-wrap {
+    box-shadow: none !important;
+    max-width: none !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  /* ── Typography ── */
+  body { font-size: 11pt; line-height: 1.55; }
+  h2 { font-size: 14pt; }
+  h3 { font-size: 10pt; }
+  .doc-header h1 { font-size: 24pt; }
+
+  /* ── Header: keep on first page, don't break inside ── */
+  .doc-header {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    padding: 24px 32px 20px !important;
+  }
+
+  /* ── Section blocks: try to keep heading with content ── */
+  .section-block { break-inside: auto; }
+  .section-title-bar {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  /* ── Callout boxes: avoid breaking in the middle ── */
+  .callout-box {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* ── Tables: headers repeat across pages, avoid orphan rows ── */
+  .states-table { border-collapse: collapse; width: 100%; }
+  .states-table thead { display: table-header-group; }
+  .states-table tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .doc-table thead { display: table-header-group; }
+  .doc-table tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* ── Equipment checklist: allow flow but keep rows together ── */
+  .check-grid { break-inside: auto; }
+  .check-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* ── Two-col layouts: stack to single column on narrow print ── */
+  .two-col {
+    display: block !important;
+  }
+  .two-col > * {
+    margin-bottom: 12px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* ── Vitals grid ── */
+  .vitals-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* ── Timing strip ── */
+  .timing-strip {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* ── Debriefing questions ── */
+  .debrief-q {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* ── Key moments ── */
+  .key-moment {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* ── Obj rows ── */
+  .obj-row {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* ── Page dividers become actual page breaks ── */
+  .page-divider {
+    border: none !important;
+    margin: 0 !important;
+    page-break-after: always;
+    break-after: page;
+  }
+
+  /* ── Body padding reduction for print ── */
+  .doc-body { padding: 24px 32px 32px !important; }
+
+  /* ── Links: show plain text, no underline ── */
+  a { text-decoration: none !important; color: inherit !important; }
+  a[href]::after { content: none !important; }
+
+  /* ── Colours: preserve background colours for headers ── */
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ TOOLBAR ══ -->
+<div id="edit-toolbar">
+  <span class="tb-title">Scenario Doc</span>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" id="toggleEditBtn" onclick="toggleEdit()">✏️ Edit Mode</button>
+  <button class="tb-btn" id="restoreBtn" onclick="toggleRestorePanel()">
+    ↩ Restore <span class="deleted-count" id="deletedCount">0</span>
+  </button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" id="downloadBtn" onclick="downloadClean()">⬇ Download Clean Copy</button>
+  <span class="tb-hint" id="tb-hint">Turn on Edit Mode to remove or edit content</span>
+</div>
+
+<!-- ══ RESTORE PANEL ══ -->
+<div id="restore-panel">
+  <h4>Hidden Items — click to restore</h4>
+  <div id="restore-list"></div>
+</div>
+
+<!-- ══ TEXT EDITOR MODAL ══ -->
+<div id="editor-overlay" onclick="closeEditor()"></div>
+<div id="inline-editor">
+  <div class="ie-header">
+    <span>EDIT TEXT</span>
+    <button class="ie-close" onclick="closeEditor()">✕</button>
+  </div>
+  <textarea id="edit-textarea"></textarea>
+  <div class="ie-footer">
+    <button class="ie-btn ie-btn-cancel" onclick="closeEditor()">Cancel</button>
+    <button class="ie-btn ie-btn-save" onclick="saveEdit()">Save</button>
+  </div>
+</div>
+
+<!-- ══ PAGE ══ -->
+<div class="page-wrap">
+
+  <div class="doc-header editable" data-label="Document Header">
+    <span class="eyebrow">Simulation Scenario</span>
+    <h1>Paediatric Septic Shock</h1>
+    <div class="doc-sub">Full Scenario Document</div>
+
+  </div>
+
+  <div class="doc-body">
+
+    <!-- SECTION I -->
+    <div class="section-block editable" data-label="Section I — Demographics">
+      <div class="section-title-bar">
+        <span class="section-num">Section I</span>
+        <h2>Scenario Demographics</h2>
+      </div>
+      <div class="kv-row editable" data-label="Scenario Title row"><span class="kv-key">Scenario Title</span><span class="kv-val">Paediatric Septic Shock</span></div>
+      <div class="kv-row editable" data-label="Date row"><span class="kv-key">Date of Development</span><span class="kv-val">09/06/2015</span></div>
+      <div class="kv-row editable" data-label="Target Group row"><span class="kv-key">Target Learning Group</span><span class="kv-val"><strong>All Groups</strong> — Juniors (PGY 1–2) and Seniors (PGY ≥ 3)</span></div>
+    </div>
+
+    <!-- SECTION II -->
+    <div class="section-block editable" data-label="Section II — Developers">
+      <div class="section-title-bar">
+        <span class="section-num">Section II</span>
+        <h2>Scenario Developers</h2>
+      </div>
+      <div class="kv-row editable" data-label="Contact row"><span class="kv-key">Contact</span><span class="kv-val"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="8ee5edefe0ebfcfdcee9e3efe7e2a0ede1e3">[email&#160;protected]</a></span></div>
+    </div>
+
+    <!-- SECTION III -->
+    <div class="section-block editable" data-label="Section III — Curriculum Integration">
+      <div class="section-title-bar">
+        <span class="section-num">Section III</span>
+        <h2>Curriculum Integration</h2>
+      </div>
+      <div class="callout-box editable" data-label="Learning Goals & Objectives box">
+        <div class="callout-box-header cbh-teal">Learning Goals &amp; Objectives</div>
+        <div class="callout-box-body">
+          <div class="obj-row editable" data-label="Educational Goal">
+            <div class="obj-label">Educational Goal</div>
+            <div class="obj-content">To allow learners to become more comfortable managing common issues associated with paediatric resuscitation.</div>
+          </div>
+          <div class="obj-row editable" data-label="CRM Objectives">
+            <div class="obj-label">CRM Objectives</div>
+            <div class="obj-content"><ul><li>Communicate effectively with team regarding orders and drug doses.</li><li>Allocate resources appropriately to manage a distraught parent.</li></ul></div>
+          </div>
+          <div class="obj-row editable" data-label="Medical Objectives">
+            <div class="obj-label">Medical Objectives</div>
+            <div class="obj-content"><ul><li>Recognise the need for early IO access in critically unwell child where IV is unsuccessful.</li><li>Initiate appropriate investigations and treatment: glucose check, IV antibiotics, IV fluids then vasopressors.</li><li>Recognise the need to intubate a septic child with altered level of consciousness.</li></ul></div>
+          </div>
+        </div>
+      </div>
+      <div class="callout-box editable" data-label="Case Summary box">
+        <div class="callout-box-header cbh-navy">Case Summary</div>
+        <div class="callout-box-body">
+          <p>A 4-year-old girl is brought to the ED because she is "not herself." She has had 3 days of fever and cough and is previously healthy. She looks toxic on arrival with delayed capillary refill, a glazed stare, tachypnoea, and tachycardia.</p>
+          <p>The team will be unable to obtain IV access and will need to insert an IO. Once they have access, they will need to resuscitate by pushing fluids. If they do not, the patient's BP will drop. If a cap sugar is not checked, the patient will seize. The patient will remain listless after fluid resuscitation and will require intubation.</p>
+        </div>
+      </div>
+      <div class="callout-box editable" data-label="References box">
+        <div class="callout-box-header cbh-amber">References</div>
+        <div class="callout-box-body"><ul>
+          <li>Marx, J.A., Hockberger, R.S., Walls, R.M., &amp; Adams, J. (2013). <em>Rosen's Emergency Medicine.</em> St. Louis: Mosby.</li>
+          <li>circ.ahajournals.org/content/132/18_suppl_2/S526</li>
+          <li>rch.org.au/clinicalguide/guideline_index/Intraosseous_access/</li>
+        </ul></div>
+      </div>
+    </div>
+
+    <hr class="page-divider">
+
+    <!-- SECTION IV -->
+    <div class="section-block editable" data-label="Section IV — Scenario Script">
+      <div class="section-title-bar"><span class="section-num">Section IV</span><h2>Scenario Script</h2></div>
+
+      <div class="editable" data-label="Cast & Realism">
+        <h3>A. Scenario Cast &amp; Realism</h3>
+        <div class="two-col" style="margin-bottom:16px">
+          <div class="callout-box editable" data-label="Patient / Mannequin box" style="margin:0">
+            <div class="callout-box-header cbh-navy">Patient</div>
+            <div class="callout-box-body"><strong>Paediatric Computerised Mannequin</strong><br><span style="font-size:13px;color:var(--ink-muted)">Realism: Conceptual &amp; Emotional/Experiential</span></div>
+          </div>
+          <div class="callout-box editable" data-label="Confederates box" style="margin:0">
+            <div class="callout-box-header cbh-teal">Confederates</div>
+            <div class="callout-box-body">
+              <p><strong>Mother</strong> — Can provide history. For seniors: may become obstructive or extremely distraught.</p>
+              <p style="margin-top:6px"><strong>RN</strong> — Indicates when IV access cannot be established.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="editable" data-label="Required Monitors section">
+        <h3>B. Required Monitors</h3>
+        <div class="check-grid" style="margin-bottom:20px">
+          <div class="check-item checked editable" data-label="EKG Leads monitor"><span class="check-box ticked">✓</span>EKG Leads/Wires</div>
+          <div class="check-item editable" data-label="Temperature Probe monitor"><span class="check-box"></span>Temperature Probe</div>
+          <div class="check-item editable" data-label="Central Venous Line monitor"><span class="check-box"></span>Central Venous Line</div>
+          <div class="check-item checked editable" data-label="NIBP Cuff monitor"><span class="check-box ticked">✓</span>NIBP Cuff</div>
+          <div class="check-item editable" data-label="Defibrillator Pads monitor"><span class="check-box"></span>Defibrillator Pads</div>
+          <div class="check-item editable" data-label="Capnography monitor"><span class="check-box"></span>Capnography</div>
+          <div class="check-item checked editable" data-label="Pulse Oximeter monitor"><span class="check-box ticked">✓</span>Pulse Oximeter</div>
+          <div class="check-item editable" data-label="Arterial Line monitor"><span class="check-box"></span>Arterial Line</div>
+          <div class="check-item"><span class="check-box"></span>—</div>
+        </div>
+      </div>
+
+      <div class="editable" data-label="Required Equipment section">
+        <h3>C. Required Equipment</h3>
+        <div class="check-grid" style="margin-bottom:20px">
+          <div class="check-item checked editable" data-label="Gloves"><span class="check-box ticked">✓</span>Gloves</div>
+          <div class="check-item checked editable" data-label="Nasal Prongs"><span class="check-box ticked">✓</span>Nasal Prongs</div>
+          <div class="check-item editable" data-label="Scalpel"><span class="check-box"></span>Scalpel</div>
+          <div class="check-item checked editable" data-label="Stethoscope"><span class="check-box ticked">✓</span>Stethoscope</div>
+          <div class="check-item checked editable" data-label="Venturi Mask"><span class="check-box ticked">✓</span>Venturi Mask</div>
+          <div class="check-item editable" data-label="Tube Thoracostomy Kit"><span class="check-box"></span>Tube Thoracostomy Kit</div>
+          <div class="check-item editable" data-label="Defibrillator"><span class="check-box"></span>Defibrillator</div>
+          <div class="check-item checked editable" data-label="Non-Rebreather Mask"><span class="check-box ticked">✓</span>Non-Rebreather Mask</div>
+          <div class="check-item editable" data-label="Cricothyroidotomy Kit"><span class="check-box"></span>Cricothyroidotomy Kit</div>
+          <div class="check-item checked editable" data-label="IV Bags/Lines"><span class="check-box ticked">✓</span>IV Bags/Lines</div>
+          <div class="check-item checked editable" data-label="Bag Valve Mask"><span class="check-box ticked">✓</span>Bag Valve Mask</div>
+          <div class="check-item editable" data-label="Thoracotomy Kit"><span class="check-box"></span>Thoracotomy Kit</div>
+          <div class="check-item checked editable" data-label="IV Push Medications"><span class="check-box ticked">✓</span>IV Push Medications</div>
+          <div class="check-item checked editable" data-label="Laryngoscope"><span class="check-box ticked">✓</span>Laryngoscope</div>
+          <div class="check-item editable" data-label="Central Line Kit"><span class="check-box"></span>Central Line Kit</div>
+          <div class="check-item editable" data-label="PO Tabs"><span class="check-box"></span>PO Tabs</div>
+          <div class="check-item editable" data-label="Video Laryngoscope"><span class="check-box"></span>Video Laryngoscope</div>
+          <div class="check-item editable" data-label="Arterial Line Kit"><span class="check-box"></span>Arterial Line Kit</div>
+          <div class="check-item editable" data-label="Blood Products"><span class="check-box"></span>Blood Products</div>
+          <div class="check-item checked editable" data-label="ET Tubes"><span class="check-box ticked">✓</span>ET Tubes</div>
+          <div class="check-item checked editable" data-label="Masks/Gowns droplet precautions"><span class="check-box ticked">✓</span>Masks/Gowns — droplet precautions</div>
+          <div class="check-item checked editable" data-label="Intraosseous Set-up"><span class="check-box ticked">✓</span>Intraosseous Set-up</div>
+          <div class="check-item editable" data-label="LMA"><span class="check-box"></span>LMA</div>
+          <div class="check-item"><span class="check-box"></span>—</div>
+        </div>
+      </div>
+
+      <div class="editable" data-label="Moulage section">
+        <h3>D. Moulage</h3>
+        <p style="font-size:14px;color:var(--ink-muted);margin-bottom:20px">None required.</p>
+      </div>
+
+      <div class="editable" data-label="Timing section">
+        <h3>E. Approximate Timing</h3>
+        <div class="timing-strip">
+          <div class="timing-item editable" data-label="Set-Up timing"><div class="ti-label">Set-Up</div><div class="ti-val">3 min</div></div>
+          <div class="timing-item editable" data-label="Scenario timing"><div class="ti-label">Scenario</div><div class="ti-val">12 min</div></div>
+          <div class="timing-item editable" data-label="Debriefing timing"><div class="ti-label">Debriefing</div><div class="ti-val">20 min</div></div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="page-divider">
+
+    <!-- SECTION V -->
+    <div class="section-block editable" data-label="Section V — Patient Data">
+      <div class="section-title-bar"><span class="section-num">Section V</span><h2>Patient Data &amp; Baseline State</h2></div>
+      <div class="callout-box editable" data-label="Clinical Vignette box" style="margin-bottom:20px">
+        <div class="callout-box-header cbh-burgundy">Clinical Vignette — Read Aloud at Beginning of Case</div>
+        <div class="callout-box-body" style="font-style:italic;font-size:14.5px;line-height:1.75">
+          A 4-year-old girl presents to your paediatric ED. Her mother states she is "not herself" and seems "lethargic." She's had a fever and a cough for the last three days. Today she just seems different. She was brought straight into a resus room and the charge nurse came to find you to tell you the child looks unwell.
+        </div>
+      </div>
+      <div class="editable" data-label="Patient Profile & History">
+        <h3>Patient Profile &amp; History</h3>
+        <div class="two-col" style="margin-bottom:8px">
+          <div>
+            <div class="kv-row editable" data-label="Name row"><span class="kv-key">Name</span><span class="kv-val">Rebecca Smythe</span></div>
+            <div class="kv-row editable" data-label="Age row"><span class="kv-key">Age</span><span class="kv-val">4 years</span></div>
+            <div class="kv-row editable" data-label="Weight row"><span class="kv-key">Weight</span><span class="kv-val"><strong>20 kg</strong></span></div>
+            <div class="kv-row editable" data-label="Gender row"><span class="kv-key">Gender</span><span class="kv-val">Female</span></div>
+            <div class="kv-row editable" data-label="Code Status row"><span class="kv-key">Code Status</span><span class="kv-val">Full</span></div>
+          </div>
+          <div>
+            <div class="kv-row editable" data-label="Chief Complaint row"><span class="kv-key">Chief Complaint</span><span class="kv-val">Lethargic</span></div>
+            <div class="kv-row editable" data-label="PMHx row"><span class="kv-key">PMHx</span><span class="kv-val">Healthy, IUTD, term delivery</span></div>
+            <div class="kv-row editable" data-label="Medications row"><span class="kv-key">Medications</span><span class="kv-val">None</span></div>
+            <div class="kv-row editable" data-label="Allergies row"><span class="kv-key">Allergies</span><span class="kv-val">None</span></div>
+            <div class="kv-row editable" data-label="Family Hx row"><span class="kv-key">Family Hx</span><span class="kv-val">Father has asthma</span></div>
+          </div>
+        </div>
+        <div class="kv-row editable" data-label="HPI row"><span class="kv-key">HPI</span><span class="kv-val">Fever and cough for 3 days. Today: not as responsive, disinterested, won't eat or drink. No known sick contacts but attends pre-kindergarten. Has a 1-year-old brother.</span></div>
+      </div>
+      <div class="editable" data-label="Review of Systems">
+        <h3 style="margin-top:20px">Review of Systems</h3>
+        <div class="two-col">
+          <div>
+            <div class="kv-row editable" data-label="CNS ROS"><span class="kv-key">CNS</span><span class="kv-val"><strong>Lethargic, listless</strong></span></div>
+            <div class="kv-row editable" data-label="HEENT ROS"><span class="kv-key">HEENT</span><span class="kv-val">Nil</span></div>
+            <div class="kv-row editable" data-label="CVS ROS"><span class="kv-key">CVS</span><span class="kv-val">Nil</span></div>
+            <div class="kv-row editable" data-label="RESP ROS"><span class="kv-key">RESP</span><span class="kv-val"><strong>Cough for 3 days</strong></span></div>
+          </div>
+          <div>
+            <div class="kv-row editable" data-label="GI ROS"><span class="kv-key">GI</span><span class="kv-val">Nil</span></div>
+            <div class="kv-row editable" data-label="GU ROS"><span class="kv-key">GU</span><span class="kv-val"><strong>No urine output today</strong></span></div>
+            <div class="kv-row editable" data-label="MSK ROS"><span class="kv-key">MSK</span><span class="kv-val">Nil</span></div>
+            <div class="kv-row editable" data-label="Skin ROS"><span class="kv-key">Skin</span><span class="kv-val">No rashes</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="editable" data-label="Baseline Vitals">
+        <h3 style="margin-top:20px">Baseline Vitals</h3>
+        <div class="vitals-grid">
+          <div class="vital-card editable" data-label="Heart Rate vital"><div class="vc-param">Heart Rate</div><div class="vc-val">140</div><div class="vc-note">/min — sinus tach</div></div>
+          <div class="vital-card editable" data-label="Blood Pressure vital"><div class="vc-param">Blood Pressure</div><div class="vc-val">82/44</div><div class="vc-note">mmHg</div></div>
+          <div class="vital-card editable" data-label="Resp Rate vital"><div class="vc-param">Resp Rate</div><div class="vc-val">40</div><div class="vc-note">/min</div></div>
+          <div class="vital-card editable" data-label="SpO₂ vital"><div class="vc-param">SpO₂</div><div class="vc-val">91%</div><div class="vc-note">room air</div></div>
+          <div class="vital-card editable" data-label="Temperature vital"><div class="vc-param">Temperature</div><div class="vc-val">39°C</div><div class="vc-note">fever</div></div>
+          <div class="vital-card editable" data-label="Glucose vital"><div class="vc-param">Glucose</div><div class="vc-val">2.4</div><div class="vc-note">mmol/L — critically low</div></div>
+        </div>
+      </div>
+      <div class="editable" data-label="Physical Examination">
+        <h3>Physical Examination</h3>
+        <div class="kv-row editable" data-label="General exam"><span class="kv-key">General</span><span class="kv-val"><strong>Looks toxic and unwell</strong></span></div>
+        <div class="kv-row editable" data-label="CNS exam"><span class="kv-key">CNS</span><span class="kv-val"><strong>Glazed stare. Lethargic.</strong> PERLA.</span></div>
+        <div class="kv-row editable" data-label="HEENT exam"><span class="kv-key">HEENT</span><span class="kv-val">Normal TMs. PERLA. Glazed stare.</span></div>
+        <div class="kv-row editable" data-label="CVS exam"><span class="kv-key">CVS</span><span class="kv-val">No murmur. <strong>Cap refill 5 sec centrally. Eyes sunken.</strong></span></div>
+        <div class="kv-row editable" data-label="RESP exam"><span class="kv-key">RESP</span><span class="kv-val">GAEB. <strong>Rhonchi to right.</strong></span></div>
+        <div class="kv-row editable" data-label="Abdomen exam"><span class="kv-key">Abdomen</span><span class="kv-val">Nil</span></div>
+        <div class="kv-row editable" data-label="GU exam"><span class="kv-key">GU</span><span class="kv-val">Nil</span></div>
+        <div class="kv-row editable" data-label="MSK/Skin exam"><span class="kv-key">MSK / Skin</span><span class="kv-val">No hot joints. No rashes.</span></div>
+      </div>
+    </div>
+
+    <hr class="page-divider">
+
+    <!-- SECTION VI -->
+    <div class="section-block editable" data-label="Section VI — Scenario Progression">
+      <div class="section-title-bar"><span class="section-num">Section VI</span><h2>Scenario Progression</h2></div>
+      <table class="states-table">
+        <thead><tr><th style="width:18%">Patient State</th><th style="width:20%">Patient Status</th><th style="width:31%">Learner Actions</th><th style="width:31%">Modifiers &amp; Triggers</th></tr></thead>
+        <tbody>
+          <tr class="editable" data-label="State 1 — Baseline row">
+            <td><div class="state-name">1. Baseline State</div><div class="state-vitals"><span>HR: 140/min</span><span>BP: 82/44</span><span>RR: 40/min</span><span>SpO₂: 91%</span><span>T: 39°C</span></div></td>
+            <td style="font-size:13px">Looks unwell. Cap refill 5 sec. Glazed stare.</td>
+            <td><span class="col-label">Actions</span><ul class="action-list"><li>Attempt IV access (unable)</li><li>Attempt IO access</li><li>Monitors</li><li>Apply O₂</li><li>Septic lab workup</li><li>CXR</li><li>Push fluids 20 ml/kg × 3 (400 ml/bolus)</li><li>Check glucose — replace with D25W 40–80 ml</li><li>Ceftriaxone 50 mg/kg IV</li><li>Take history from mother</li></ul></td>
+            <td><span class="col-label col-label-modifier">Modifiers</span><ul class="modifier-list"><li>No fluids / no access by 2 min → BP 75/35</li></ul><span class="col-label col-label-trigger" style="margin-top:10px">Triggers</span><ul class="trigger-list"><li>No glucose by 4 min → <strong>State 2</strong></li><li>Glucose + fluids → <strong>State 3</strong></li><li>6 min → <strong>State 3</strong></li></ul></td>
+          </tr>
+          <tr class="editable" data-label="State 2 — Seizure row">
+            <td><div class="state-name">2. Seizure</div><div class="state-vitals"><span>HR → 155/min</span><span>BP → 145/95</span></div></td>
+            <td style="font-size:13px">Nurse: "I think she's seizing."<br><em>(Optional: mother panics)</em></td>
+            <td><span class="col-label">Actions</span><ul class="action-list"><li>Give D25W 40–80 ml</li><li>Ensure staff wearing masks</li><li>± Add Vancomycin</li><li>Delegate team member to support mother</li></ul></td>
+            <td><span class="col-label col-label-modifier">Modifiers</span><ul class="modifier-list"><li>Benzo given → no change to seizure</li></ul><span class="col-label col-label-trigger" style="margin-top:10px">Triggers</span><ul class="trigger-list"><li>Glucose given → <strong>State 3</strong></li><li>8 min → <strong>State 3</strong></li></ul></td>
+          </tr>
+          <tr class="editable" data-label="State 3 — Persistent Hypotension row">
+            <td><div class="state-name">3. Persistent Hypotension</div><div class="state-vitals"><span>HR: 130/min</span><span>BP: 75/35</span></div></td>
+            <td style="font-size:13px">Patient still listless, poorly responsive.</td>
+            <td><span class="col-label">Actions</span><ul class="action-list"><li>Bolus fluids to 60 ml/kg total</li><li>Epinephrine or Norepinephrine 0.05 mcg/kg/min</li><li>Consult ICU</li><li>Consider intubation</li></ul></td>
+            <td><span class="col-label col-label-modifier">Modifiers</span><ul class="modifier-list"><li>9 min no pressor → BP 70/30</li><li>10 min no pressor → BP 65/25</li></ul><span class="col-label col-label-trigger" style="margin-top:10px">Triggers</span><ul class="trigger-list"><li>Pressor started → <strong>State 4</strong></li><li>Intubation → <strong>State 5</strong></li></ul></td>
+          </tr>
+          <tr class="editable" data-label="State 4 — Poorly Responsive row">
+            <td><div class="state-name">4. Poorly Responsive</div><div class="state-vitals"><span>HR → 120/min</span><span>BP → 85/45</span></div></td>
+            <td style="font-size:13px">Not responsive. BP/HR stabilised, LOC worsening.</td>
+            <td><span class="col-label">Actions</span><ul class="action-list"><li>Consider intubation</li><li>Tube: 5.0 uncuffed or 4.5 cuffed</li><li>Ketamine or Etomidate</li><li>Paralytic agent</li><li>Apnoeic oxygenation</li></ul></td>
+            <td><span class="col-label col-label-modifier">Modifiers</span><ul class="modifier-list"><li>No intubation → SpO₂ falls to 85%</li></ul><span class="col-label col-label-trigger" style="margin-top:10px">Triggers</span><ul class="trigger-list"><li>Intubation → <strong>State 5</strong></li></ul></td>
+          </tr>
+          <tr class="editable" data-label="State 5 — Intubation row">
+            <td><div class="state-name">5. Intubation</div><div class="state-vitals"><span>Vitals unchanged</span></div></td>
+            <td style="font-size:13px">—</td>
+            <td><span class="col-label">Actions</span><ul class="action-list"><li>Intubate</li><li>Post-intubation CXR</li><li>Start Midazolam sedation</li><li>Insert OG tube</li><li>Call ICU</li></ul></td>
+            <td><span class="col-label col-label-modifier">Modifiers</span><ul class="modifier-list"><li>Paralytics given → RR 0</li></ul><span class="col-label col-label-trigger" style="margin-top:10px">Triggers</span><ul class="trigger-list"><li>Intubation → <strong>END CASE</strong></li><li>12 min → <strong>END CASE</strong></li></ul></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <hr class="page-divider">
+
+    <!-- SECTION VII -->
+    <div class="section-block editable" data-label="Section VII — Supporting Documents">
+      <div class="section-title-bar"><span class="section-num">Section VII</span><h2>Supporting Documents &amp; Multimedia</h2></div>
+      <div class="callout-box editable" data-label="Lab Results box" style="margin-bottom:16px">
+        <div class="callout-box-header cbh-navy">Laboratory Results</div>
+        <div class="callout-box-body" style="color:var(--ink-muted);font-style:italic">No blood work required for this case.</div>
+      </div>
+      <div class="callout-box editable" data-label="Images Required box">
+        <div class="callout-box-header cbh-teal">Images Required</div>
+        <div class="callout-box-body">
+          <div class="kv-row editable" data-label="CXR image reference"><span class="kv-key">CXR</span><span class="kv-val">Chest X-ray showing pneumonia<br><span style="font-size:12px;color:var(--ink-muted)">radiopaedia.org/articles/round-pneumonia-1</span></span></div>
+          <div class="kv-row editable" data-label="ECG image reference"><span class="kv-key">ECG</span><span class="kv-val">ECG showing sinus tachycardia<br><span style="font-size:12px;color:var(--ink-muted)">lifeinthefastlane.com/ecg-library/sinus-tachycardia/</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="page-divider">
+
+    <!-- SECTION VIII -->
+    <div class="section-block editable" data-label="Section VIII — Debriefing Guide">
+      <div class="section-title-bar"><span class="section-num">Section VIII</span><h2>Debriefing Guide</h2></div>
+      <div class="two-col" style="margin-bottom:20px">
+        <div class="callout-box editable" data-label="Format box" style="margin:0">
+          <div class="callout-box-header cbh-navy">Format</div>
+          <div class="callout-box-body">
+            <div class="kv-row" style="padding:4px 0"><span class="kv-key" style="min-width:120px">Style</span><span class="kv-val"><strong>Group</strong></span></div>
+            <div class="kv-row" style="padding:4px 0"><span class="kv-key" style="min-width:120px">Video</span><span class="kv-val">Without video</span></div>
+          </div>
+        </div>
+        <div class="callout-box editable" data-label="Key Moments box" style="margin:0">
+          <div class="callout-box-header cbh-amber">Key Moments</div>
+          <div class="callout-box-body" style="padding:10px 16px">
+            <div class="key-moment editable" data-label="IO access key moment" style="margin-bottom:8px">Recognition of need for IO access</div>
+            <div class="key-moment editable" data-label="Distraught mother key moment" style="margin-bottom:8px">Addressing needs of distraught mother</div>
+            <div class="key-moment editable" data-label="Vasopressors/intubation key moment" style="margin-bottom:0">Decision to start vasopressors and intubate</div>
+          </div>
+        </div>
+      </div>
+      <div class="editable" data-label="Debriefing Questions">
+        <h3>Sample Debriefing Questions</h3>
+        <div style="background:var(--white);border:1px solid var(--rule);border-radius:8px;padding:8px 18px;margin-bottom:20px">
+          <div class="debrief-q editable" data-label="Debrief Q1"><span class="dq-num">1</span><span>How did it feel to perform a resuscitation with a distraught mother in the room? How do you feel the team handled the situation? Do you have any suggestions for how to improve this?</span></div>
+          <div class="debrief-q editable" data-label="Debrief Q2"><span class="dq-num">2</span><span>How did the team approach drug dosing in this child? Did you all feel comfortable with how dosing decisions were made and communicated? What are some ways to calculate weight and dosing when you are uncertain?</span></div>
+          <div class="debrief-q editable" data-label="Debrief Q3"><span class="dq-num">3</span><span>Does everyone feel comfortable putting in an IO? What are the steps? Where can you put it?</span></div>
+          <div class="debrief-q editable" data-label="Debrief Q4"><span class="dq-num">4</span><span>How do you calculate glucose replacement in a child?</span></div>
+          <div class="debrief-q editable" data-label="Debrief Q5"><span class="dq-num">5</span><span>What considerations are required for a paediatric intubation as compared to an adult intubation?</span></div>
+        </div>
+      </div>
+      <div class="callout-box editable" data-label="Debrief Objectives Reference box">
+        <div class="callout-box-header cbh-teal">Objectives — Debrief Reference</div>
+        <div class="callout-box-body">
+          <div class="obj-row editable" data-label="CRM debrief objectives"><div class="obj-label">CRM</div><div class="obj-content"><ul><li>Communicate effectively with team regarding orders and drug doses.</li><li>Allocate resources appropriately to manage a distraught parent.</li></ul></div></div>
+          <div class="obj-row editable" data-label="Medical debrief objectives"><div class="obj-label">Medical</div><div class="obj-content"><ul><li>Recognise the need for early IO access in critically unwell child where IV is unsuccessful.</li><li>Initiate appropriate investigations and treatment: glucose check, antibiotics, fluids then vasopressors.</li><li>Recognise the need to intubate a septic child with altered level of consciousness.</li></ul></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /doc-body -->
+
+</div><!-- /page-wrap -->
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ═══════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════
+let editMode = false;
+let deletedItems = []; // {el, parent, nextSibling, label}
+let currentEditEl = null;
+let idCounter = 0;
+
+// ═══════════════════════════════════════
+//  TOGGLE EDIT MODE
+// ═══════════════════════════════════════
+function toggleEdit() {
+  editMode = !editMode;
+  document.body.classList.toggle('edit-mode', editMode);
+  const btn = document.getElementById('toggleEditBtn');
+  const hint = document.getElementById('tb-hint');
+  if (editMode) {
+    btn.textContent = '✓ Editing — click content to remove or edit';
+    btn.classList.add('active');
+    hint.textContent = 'Hover over any block → Remove (red) or Edit text (blue)';
+    injectButtons();
+  } else {
+    btn.textContent = '✏️ Edit Mode';
+    btn.classList.remove('active');
+    hint.textContent = 'Turn on Edit Mode to remove or edit content';
+    removeButtons();
+  }
+}
+
+// ═══════════════════════════════════════
+//  INJECT / REMOVE BUTTONS
+// ═══════════════════════════════════════
+function injectButtons() {
+  document.querySelectorAll('.editable').forEach(el => {
+    if (el.querySelector(':scope > .delete-btn')) return; // already injected
+    el.style.position = 'relative';
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'delete-btn';
+    delBtn.innerHTML = '✕ Remove';
+    delBtn.title = 'Remove this block';
+    delBtn.onclick = (e) => { e.stopPropagation(); deleteBlock(el); };
+    el.appendChild(delBtn);
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'edit-text-btn';
+    editBtn.innerHTML = '✎ Edit text';
+    editBtn.title = 'Edit text in this block';
+    editBtn.onclick = (e) => { e.stopPropagation(); openEditor(el); };
+    el.appendChild(editBtn);
+  });
+}
+
+function removeButtons() {
+  document.querySelectorAll('.delete-btn, .edit-text-btn').forEach(b => b.remove());
+}
+
+// ═══════════════════════════════════════
+//  DELETE / RESTORE
+// ═══════════════════════════════════════
+function deleteBlock(el) {
+  const label = el.dataset.label || 'Unnamed block';
+  deletedItems.push({ el, parent: el.parentNode, next: el.nextSibling, label });
+  el.remove();
+  updateDeletedCount();
+  updateRestorePanel();
+}
+
+function restoreBlock(index) {
+  const item = deletedItems[index];
+  if (item.next && item.next.parentNode === item.parent) {
+    item.parent.insertBefore(item.el, item.next);
+  } else {
+    item.parent.appendChild(item.el);
+  }
+  deletedItems.splice(index, 1);
+  if (editMode) injectButtons();
+  updateDeletedCount();
+  updateRestorePanel();
+}
+
+function updateDeletedCount() {
+  const n = deletedItems.length;
+  document.getElementById('deletedCount').textContent = n;
+  const btn = document.getElementById('restoreBtn');
+  btn.classList.toggle('visible', n > 0);
+  if (n === 0 && document.getElementById('restore-panel').classList.contains('visible')) {
+    document.getElementById('restore-panel').classList.remove('visible');
+  }
+}
+
+function updateRestorePanel() {
+  const list = document.getElementById('restore-list');
+  list.innerHTML = '';
+  if (deletedItems.length === 0) {
+    list.innerHTML = '<p style="font-size:12px;color:rgba(255,255,255,0.3);text-align:center;padding:8px">Nothing hidden yet</p>';
+    return;
+  }
+  deletedItems.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'restore-item';
+    div.innerHTML = `<span>${item.label}</span><button onclick="restoreBlock(${i})">↩ Restore</button>`;
+    list.appendChild(div);
+  });
+}
+
+function toggleRestorePanel() {
+  const panel = document.getElementById('restore-panel');
+  panel.classList.toggle('visible');
+  updateRestorePanel();
+}
+
+// ═══════════════════════════════════════
+//  TEXT EDITOR
+// ═══════════════════════════════════════
+function openEditor(el) {
+  currentEditEl = el;
+  // Get inner text (strip our injected buttons first)
+  const clone = el.cloneNode(true);
+  clone.querySelectorAll('.delete-btn, .edit-text-btn').forEach(b => b.remove());
+  document.getElementById('edit-textarea').value = clone.innerText.trim();
+  document.getElementById('inline-editor').classList.add('visible');
+  document.getElementById('editor-overlay').classList.add('visible');
+  setTimeout(() => document.getElementById('edit-textarea').focus(), 50);
+}
+
+function closeEditor() {
+  document.getElementById('inline-editor').classList.remove('visible');
+  document.getElementById('editor-overlay').classList.remove('visible');
+  currentEditEl = null;
+}
+
+function saveEdit() {
+  if (!currentEditEl) return;
+  // Find a text node or value span to update
+  const newText = document.getElementById('edit-textarea').value;
+  // Try to find the main content span (kv-val, obj-content, etc.)
+  const targets = ['kv-val', 'obj-content', 'callout-box-body', 'vc-val', 'vc-note', 'state-name'];
+  let updated = false;
+  for (const cls of targets) {
+    const t = currentEditEl.querySelector(`.${cls}`);
+    if (t) { t.textContent = newText; updated = true; break; }
+  }
+  if (!updated) {
+    // Fallback: update first text node found
+    const walker = document.createTreeWalker(currentEditEl, NodeFilter.SHOW_TEXT);
+    const node = walker.nextNode();
+    if (node) node.textContent = newText;
+  }
+  closeEditor();
+}
+
+// ═══════════════════════════════════════
+//  DOWNLOAD CLEAN COPY
+// ═══════════════════════════════════════
+function downloadClean() {
+  const clone = document.documentElement.cloneNode(true);
+  // Remove toolbar, restore panel, editor modal
+  ['edit-toolbar','restore-panel','inline-editor','editor-overlay'].forEach(id => {
+    const el = clone.querySelector('#' + id);
+    if (el) el.remove();
+  });
+  // Remove all injected buttons
+  clone.querySelectorAll('.delete-btn, .edit-text-btn').forEach(b => b.remove());
+  // Remove edit-mode-specific styles and classes
+  clone.body.classList.remove('edit-mode');
+  // Fix margin-top on page-wrap
+  const pw = clone.querySelector('.page-wrap');
+  if (pw) pw.style.marginTop = '0';
+  // Remove all scripts
+  clone.querySelectorAll('script').forEach(s => s.remove());
+  // Clean up inline position:relative styles added by JS
+  clone.querySelectorAll('.editable').forEach(el => {
+    el.style.position = '';
+  });
+
+  const html = '<!DOCTYPE html>\n' + clone.outerHTML;
+  const blob = new Blob([html], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'septic-shock-scenario-edited.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+
+// Init
+updateRestorePanel();
+</script>
+</body>
+</html>

@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paediatric Septic Shock — Flashcards</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Epilogue:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0E1117;
+    --surface: #181C25;
+    --card-bg: #1E2330;
+    --border: #2E3447;
+    --accent: #4ECDC4;
+    --accent2: #FF6B6B;
+    --gold: #FFD93D;
+    --purple: #9B5DE5;
+    --text: #E8EAF0;
+    --muted: #7A8099;
+    --correct: #2ECC71;
+    --wrong: #E74C3C;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Epilogue', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 40px;
+  }
+
+  /* Header */
+  .app-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .app-header .tag {
+    display: inline-block;
+    background: rgba(78,205,196,0.15);
+    color: var(--accent);
+    border: 1px solid rgba(78,205,196,0.3);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .app-header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .app-header p { color: var(--muted); font-size: 14px; }
+
+  /* Progress */
+  .progress-bar-wrap {
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 20px;
+  }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .progress-info strong { color: var(--accent); }
+  .progress-track {
+    background: var(--border);
+    border-radius: 4px;
+    height: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--purple));
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+
+  /* Category tabs */
+  .cat-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 24px;
+    max-width: 640px;
+  }
+  .cat-tab {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .cat-tab.active, .cat-tab:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(78,205,196,0.08);
+  }
+
+  /* Card area */
+  .card-area {
+    width: 100%;
+    max-width: 600px;
+    perspective: 1200px;
+    margin-bottom: 20px;
+  }
+  .flashcard {
+    width: 100%;
+    min-height: 280px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+  }
+  .flashcard.flipped { transform: rotateY(180deg); }
+  .card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    border-radius: 16px;
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+  }
+  .card-front {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .card-back {
+    background: linear-gradient(135deg, #1A2540 0%, #1E2A44 100%);
+    border: 1px solid rgba(78,205,196,0.3);
+    box-shadow: 0 8px 32px rgba(78,205,196,0.1);
+    transform: rotateY(180deg);
+  }
+  .card-category {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .cat-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .card-question {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.4;
+    flex: 1;
+    display: flex;
+    align-items: center;
+  }
+  .flip-hint {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .flip-hint .icon { font-size: 16px; }
+
+  /* Back face */
+  .card-answer-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .card-answer {
+    font-size: 15px;
+    line-height: 1.65;
+    flex: 1;
+    color: var(--text);
+  }
+  .card-answer .highlight {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .card-answer .warn {
+    color: var(--gold);
+    font-weight: 700;
+  }
+  .card-answer .danger {
+    color: var(--accent2);
+    font-weight: 700;
+  }
+  .card-answer ul { margin-left: 16px; margin-top: 6px; }
+  .card-answer li { margin-bottom: 4px; }
+  .card-number-badge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    max-width: 600px;
+    width: 100%;
+    margin-bottom: 16px;
+  }
+  .btn {
+    border: none;
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-family: 'Epilogue', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-prev { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+  .btn-flip { background: var(--accent); color: var(--bg); flex: 1; justify-content: center; }
+  .btn-next { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+  .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+  /* Feedback */
+  .feedback-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    max-width: 600px;
+    width: 100%;
+    margin-bottom: 24px;
+  }
+  .fb-btn {
+    flex: 1;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    font-family: 'Epilogue', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0.7;
+  }
+  .fb-btn:hover { opacity: 1; transform: translateY(-1px); }
+  .fb-knew { background: rgba(46,204,113,0.15); color: var(--correct); border: 1px solid rgba(46,204,113,0.3); }
+  .fb-unsure { background: rgba(255,217,61,0.12); color: var(--gold); border: 1px solid rgba(255,217,61,0.3); }
+  .fb-missed { background: rgba(231,76,60,0.12); color: var(--wrong); border: 1px solid rgba(231,76,60,0.3); }
+
+  /* Stats */
+  .stats {
+    display: flex;
+    gap: 16px;
+    max-width: 600px;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  .stat-card {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    text-align: center;
+  }
+  .stat-num { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .stat-knew .stat-num { color: var(--correct); }
+  .stat-unsure .stat-num { color: var(--gold); }
+  .stat-missed .stat-num { color: var(--wrong); }
+
+  .shuffle-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 auto;
+    transition: all 0.2s;
+  }
+  .shuffle-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Category colour map */
+  .cat-recognition .cat-dot { background: #FF6B6B; }
+  .cat-recognition { color: #FF6B6B; }
+  .cat-access .cat-dot { background: #FFD93D; }
+  .cat-access { color: #FFD93D; }
+  .cat-resus .cat-dot { background: #4ECDC4; }
+  .cat-resus { color: #4ECDC4; }
+  .cat-glucose .cat-dot { background: #F7931E; }
+  .cat-glucose { color: #F7931E; }
+  .cat-meds .cat-dot { background: #9B5DE5; }
+  .cat-meds { color: #9B5DE5; }
+  .cat-intubation .cat-dot { background: #2ECC71; }
+  .cat-intubation { color: #2ECC71; }
+  .cat-crm .cat-dot { background: #3498DB; }
+  .cat-crm { color: #3498DB; }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="tag">Study Flashcards</div>
+  <h1>Paediatric Septic Shock</h1>
+  <p>Click a card to reveal the answer · Mark how well you knew it</p>
+</div>
+
+<div class="progress-bar-wrap">
+  <div class="progress-info">
+    <span>Card <strong id="progCurrent">1</strong> of <strong id="progTotal">20</strong></span>
+    <span id="progPct">0% complete</span>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progressFill" style="width:5%"></div>
+  </div>
+</div>
+
+<div class="cat-tabs">
+  <div class="cat-tab active" onclick="filterCategory('all', this)">All Cards</div>
+  <div class="cat-tab" onclick="filterCategory('recognition', this)">Recognition</div>
+  <div class="cat-tab" onclick="filterCategory('access', this)">IO Access</div>
+  <div class="cat-tab" onclick="filterCategory('resus', this)">Resuscitation</div>
+  <div class="cat-tab" onclick="filterCategory('glucose', this)">Glucose</div>
+  <div class="cat-tab" onclick="filterCategory('meds', this)">Medications</div>
+  <div class="cat-tab" onclick="filterCategory('intubation', this)">Intubation</div>
+  <div class="cat-tab" onclick="filterCategory('crm', this)">CRM</div>
+</div>
+
+<div class="card-area">
+  <div class="flashcard" id="flashcard" onclick="flipCard()">
+    <!-- front -->
+    <div class="card-face card-front">
+      <div class="card-number-badge" id="cardNumBadge">1/20</div>
+      <div class="card-category" id="cardCat"></div>
+      <div class="card-question" id="cardQuestion"></div>
+      <div class="flip-hint"><span class="icon">👆</span> Tap to reveal answer</div>
+    </div>
+    <!-- back -->
+    <div class="card-face card-back">
+      <div class="card-number-badge" id="cardNumBadge2">1/20</div>
+      <div class="card-answer-label">Answer</div>
+      <div class="card-answer" id="cardAnswer"></div>
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <button class="btn btn-prev" id="prevBtn" onclick="prevCard()">◀ Prev</button>
+  <button class="btn btn-flip" onclick="flipCard()">↩ Flip</button>
+  <button class="btn btn-next" id="nextBtn" onclick="nextCard()">Next ▶</button>
+</div>
+
+<div class="feedback-row">
+  <button class="fb-btn fb-knew" onclick="markCard('knew')">✓ Got it!</button>
+  <button class="fb-btn fb-unsure" onclick="markCard('unsure')">~ Unsure</button>
+  <button class="fb-btn fb-missed" onclick="markCard('missed')">✗ Missed</button>
+</div>
+
+<div class="stats">
+  <div class="stat-card stat-knew">
+    <div class="stat-num" id="knewCount">0</div>
+    <div class="stat-label">Got it</div>
+  </div>
+  <div class="stat-card stat-unsure">
+    <div class="stat-num" id="unsureCount">0</div>
+    <div class="stat-label">Unsure</div>
+  </div>
+  <div class="stat-card stat-missed">
+    <div class="stat-num" id="missedCount">0</div>
+    <div class="stat-label">Missed</div>
+  </div>
+</div>
+
+<button class="shuffle-btn" onclick="shuffleCards()">⇌ Shuffle Deck</button>
+
+<script>
+const allCards = [
+  {
+    category: 'recognition',
+    catLabel: 'Recognition',
+    q: 'What are the 5 key signs of septic shock in this 4-year-old patient on arrival?',
+    a: `<ul>
+      <li><span class="highlight">Tachycardia</span> — HR 140/min</li>
+      <li><span class="highlight">Hypotension</span> — BP 82/44 mmHg</li>
+      <li><span class="highlight">Tachypnoea</span> — RR 40/min</li>
+      <li><span class="highlight">Hypoxia</span> — SpO₂ 91%</li>
+      <li><span class="highlight">Altered LOC</span> — glazed stare, lethargic</li>
+    </ul>
+    <div style="margin-top:10px">Additional: cap refill >5 sec, T 39°C, glucose 2.4 mmol/L</div>`
+  },
+  {
+    category: 'recognition',
+    catLabel: 'Recognition',
+    q: 'What is a normal capillary refill time, and what does a 5-second refill indicate?',
+    a: `Normal: <span class="highlight">&lt;2 seconds</span><br><br>
+    A 5-second central capillary refill time indicates <span class="danger">severely impaired peripheral perfusion</span>, consistent with distributive/septic shock. It reflects vasoconstriction and reduced cardiac output as the body attempts to maintain core perfusion.`
+  },
+  {
+    category: 'recognition',
+    catLabel: 'Recognition',
+    q: 'This child has pneumonia. How does pneumonia cause septic shock?',
+    a: `Bacterial infection triggers <span class="highlight">systemic inflammatory response syndrome (SIRS)</span>:<br><br>
+    <ul>
+      <li>Bacterial toxins → cytokine storm (IL-1, IL-6, TNF-α)</li>
+      <li>Vasodilation → distributive shock → hypotension</li>
+      <li>Capillary leak → hypovolaemia</li>
+      <li>Myocardial depression → reduced CO</li>
+      <li>Impaired oxygen delivery to tissues</li>
+    </ul>`
+  },
+  {
+    category: 'access',
+    catLabel: 'IO Access',
+    q: 'When should you abandon IV attempts and insert an IO in a child?',
+    a: `After <span class="danger">2 minutes</span> or <span class="danger">2 failed attempts</span> in a critically unwell child — whichever comes first.<br><br>
+    <span class="warn">Do not persist with IV access when the patient is deteriorating.</span><br><br>
+    IO is the standard of care and provides an immediate, reliable route for all resuscitation fluids and drugs.`
+  },
+  {
+    category: 'access',
+    catLabel: 'IO Access',
+    q: 'What are the common sites for IO insertion in a child?',
+    a: `<ul>
+      <li><span class="highlight">Proximal tibia</span> — most common; 2 cm below tibial tuberosity, medial flat surface</li>
+      <li>Distal tibia — medial surface above medial malleolus</li>
+      <li>Distal femur — midline, 3 cm above lateral condyle</li>
+      <li>Humeral head — in older children/adults</li>
+      <li>Sternum — in adults only</li>
+    </ul>
+    All drugs, fluids, and blood products that can be given IV can be given IO.`
+  },
+  {
+    category: 'access',
+    catLabel: 'IO Access',
+    q: 'What are the contraindications to IO insertion at a specific site?',
+    a: `<ul>
+      <li><span class="danger">Fracture</span> of the target bone</li>
+      <li>Previous IO in the same bone within 24 hours (extravasation risk)</li>
+      <li>Infection or burns overlying the site</li>
+      <li>Osteoporosis (relative)</li>
+      <li>Prosthetic joint at or near the site</li>
+    </ul>
+    If one site is contraindicated, use the contralateral limb.`
+  },
+  {
+    category: 'resus',
+    catLabel: 'Resuscitation',
+    q: 'What is the fluid resuscitation protocol for a child in septic shock (weight 20 kg)?',
+    a: `<span class="highlight">20 ml/kg boluses</span> of isotonic crystalloid (normal saline or Hartmann's), given as rapid pushes.<br><br>
+    For this 20 kg child: <span class="highlight">400 ml per bolus</span><br><br>
+    Maximum: <span class="warn">60 ml/kg total</span> (1200 ml)<br><br>
+    Reassess after each bolus. If no improvement after 3 boluses → start <span class="danger">vasopressors</span>.`
+  },
+  {
+    category: 'resus',
+    catLabel: 'Resuscitation',
+    q: 'Why is fluid resuscitation prioritised before vasopressors in septic shock?',
+    a: `Most septic shock is partly <span class="highlight">hypovolaemic</span> (capillary leak, fever losses, poor intake).<br><br>
+    Vasopressors on an underfilled vascular system cause reflex tachycardia without meaningful improvement in perfusion.<br><br>
+    Fluids restore <span class="highlight">preload → stroke volume → cardiac output</span>.<br><br>
+    However, if fluid-refractory shock persists (after 60 ml/kg), <span class="warn">delay in starting pressors worsens outcome</span>.`
+  },
+  {
+    category: 'resus',
+    catLabel: 'Resuscitation',
+    q: 'Which vasopressors are used in paediatric fluid-refractory septic shock, and at what dose?',
+    a: `<span class="highlight">First line (warm/distributive shock):</span><br>
+    Norepinephrine <span class="highlight">0.05 mcg/kg/min</span> — titrate up<br><br>
+    <span class="highlight">Cold/cardiogenic component:</span><br>
+    Epinephrine <span class="highlight">0.05 mcg/kg/min</span> — titrate up<br><br>
+    <span class="warn">Both can be started via IO</span> when central access is unavailable.<br><br>
+    Dopamine is an alternative but less preferred in modern guidelines.`
+  },
+  {
+    category: 'glucose',
+    catLabel: 'Glucose',
+    q: 'Why are children with sepsis at risk of hypoglycaemia?',
+    a: `Children have <span class="highlight">limited glycogen stores</span> and high glucose demands:<br><br>
+    <ul>
+      <li>Small liver → limited hepatic glycogen</li>
+      <li>High metabolic rate → rapid glucose consumption</li>
+      <li>Cortisol response may be blunted in severe illness</li>
+      <li>Poor oral intake during illness</li>
+    </ul>
+    <span class="danger">Untreated hypoglycaemia → seizures → brain injury</span>`
+  },
+  {
+    category: 'glucose',
+    catLabel: 'Glucose',
+    q: 'A child seizes. Glucose is 2.4 mmol/L. What do you give and how much?',
+    a: `<span class="highlight">D25W (25% dextrose solution)</span><br><br>
+    Dose: <span class="highlight">2–4 ml/kg IV/IO</span><br><br>
+    For this 20 kg child: <span class="highlight">40–80 ml</span><br><br>
+    <span class="warn">Give glucose BEFORE benzodiazepines</span> — a benzo will not stop a hypoglycaemic seizure.<br><br>
+    Recheck glucose after administration.`
+  },
+  {
+    category: 'glucose',
+    catLabel: 'Glucose',
+    q: 'What glucose level is hypoglycaemia in a child, and what are clinical signs?',
+    a: `Hypoglycaemia: <span class="danger">&lt;3.3 mmol/L (&lt;60 mg/dL)</span> in children<br><br>
+    Clinical signs:
+    <ul>
+      <li>Jitteriness, tremor</li>
+      <li>Altered consciousness, lethargy</li>
+      <li>Seizures</li>
+      <li>Diaphoresis (may be absent in young children)</li>
+      <li>Tachycardia</li>
+    </ul>
+    <span class="warn">Always check glucose in any critically unwell child — it takes seconds and is easily treatable.</span>`
+  },
+  {
+    category: 'meds',
+    catLabel: 'Medications',
+    q: 'What antibiotic is given in this case of septic shock from pneumonia, and at what dose?',
+    a: `<span class="highlight">Ceftriaxone</span> (3rd generation cephalosporin)<br><br>
+    Dose: <span class="highlight">50 mg/kg IV/IO</span><br>
+    For this 20 kg child: <span class="highlight">1000 mg (1 g)</span><br><br>
+    Covers Streptococcus pneumoniae and most community-acquired pneumonia pathogens.<br><br>
+    <span class="warn">If meningitis is suspected, add Vancomycin</span> for broader CSF penetration (MRSA, penicillin-resistant pneumococcus).`
+  },
+  {
+    category: 'meds',
+    catLabel: 'Medications',
+    q: 'Why is it important to give antibiotics early in septic shock?',
+    a: `Every hour of delay in antibiotics = <span class="danger">~7% increase in mortality</span> (adapted from adult data).<br><br>
+    Early antibiotics:<br>
+    <ul>
+      <li>Reduce bacterial load and toxin release</li>
+      <li>Attenuate the inflammatory cascade</li>
+      <li>Improve organ perfusion outcomes</li>
+    </ul>
+    <span class="highlight">Target: antibiotics within 1 hour of recognition.</span><br>
+    Do NOT delay for cultures if obtaining them will cause delay.`
+  },
+  {
+    category: 'intubation',
+    catLabel: 'Intubation',
+    q: 'How do you calculate ETT size in a 4-year-old child?',
+    a: `<span class="highlight">Uncuffed tube:</span> (Age ÷ 4) + 4<br>
+    = (4 ÷ 4) + 4 = <span class="highlight">5.0</span><br><br>
+    <span class="highlight">Cuffed tube:</span> (Age ÷ 4) + 3.5<br>
+    = (4 ÷ 4) + 3.5 = <span class="highlight">4.5</span><br><br>
+    <span class="warn">Cuffed tubes are now preferred even in young children</span> as they reduce the need for re-intubation and provide better ventilator control in sick patients.<br><br>
+    Always have one size smaller and one larger ready.`
+  },
+  {
+    category: 'intubation',
+    catLabel: 'Intubation',
+    q: 'What are the indications for intubation in this septic child?',
+    a: `<ul>
+      <li><span class="danger">Altered level of consciousness</span> — inability to protect airway</li>
+      <li>Worsening respiratory failure (rising RR, falling SpO₂)</li>
+      <li>Anticipated clinical deterioration</li>
+      <li>Failure of fluid/vasopressor therapy to maintain perfusion</li>
+    </ul>
+    <span class="warn">Do not wait for complete decompensation</span> — controlled RSI in a deteriorating patient is safer than crash intubation.`
+  },
+  {
+    category: 'intubation',
+    catLabel: 'Intubation',
+    q: 'What induction agents are used for RSI in this septic child?',
+    a: `<span class="highlight">Ketamine</span> (preferred in haemodynamically unstable patients)<br>
+    — Maintains SVR and HR via catecholamine release<br>
+    — Dose: 1–2 mg/kg IV<br><br>
+    <span class="highlight">Etomidate</span> (haemodynamically neutral)<br>
+    — Dose: 0.3 mg/kg IV<br>
+    — Note: single dose adrenal suppression (controversial)<br><br>
+    <span class="warn">Avoid propofol and thiopentone</span> in shocked patients — cause profound hypotension.`
+  },
+  {
+    category: 'intubation',
+    catLabel: 'Intubation',
+    q: 'What is apnoeic oxygenation and why is it important?',
+    a: `Apnoeic oxygenation = delivery of high-flow O₂ (e.g. via nasal prongs at 4–6 L/min) <span class="highlight">during laryngoscopy</span>, even when the patient is apnoeic after paralytic administration.<br><br>
+    Mechanism: passive diffusion of O₂ from upper airway into lungs via <span class="highlight">mass flow</span>, buys additional time.<br><br>
+    <span class="warn">Especially important in sick children</span> who desaturate rapidly due to high O₂ consumption and small FRC.`
+  },
+  {
+    category: 'crm',
+    catLabel: 'CRM',
+    q: 'A mother is becoming distraught and obstructive during resuscitation. What is the best approach?',
+    a: `<span class="highlight">Designate one team member</span> specifically to support the parent — not the team leader who is managing the child.<br><br>
+    <ul>
+      <li>Acknowledge emotions with empathy: "I understand how frightening this is"</li>
+      <li>Give brief, honest updates in plain language</li>
+      <li>Consider moving parent to a nearby quiet area if their presence is interfering</li>
+      <li>Do not exclude parent entirely — family-witnessed resuscitation is evidence-supported</li>
+    </ul>`
+  },
+  {
+    category: 'crm',
+    catLabel: 'CRM',
+    q: 'How do you estimate weight for drug dosing when you don\'t know a child\'s exact weight?',
+    a: `<span class="highlight">Broselow tape</span> — measure child from head to heel, colour corresponds to weight/dose ranges (gold standard)<br><br>
+    <span class="highlight">Formula:</span> Weight (kg) = 2 × (Age + 4)<br>
+    For 4 years: 2 × (4 + 4) = <span class="highlight">16 kg</span> (estimate; actual was 20 kg)<br><br>
+    <span class="warn">Use actual weight when available.</span> When in doubt, choose lower end of range for drugs, higher end for fluids.`
+  }
+];
+
+let deck = [...allCards];
+let currentIdx = 0;
+let isFlipped = false;
+let scores = { knew: 0, unsure: 0, missed: 0 };
+
+function getCategory(card) {
+  return card.category;
+}
+
+function renderCard() {
+  const card = deck[currentIdx];
+  const catClass = `cat-${card.category}`;
+  const num = `${currentIdx + 1}/${deck.length}`;
+
+  document.getElementById('cardCat').className = `card-category ${catClass}`;
+  document.getElementById('cardCat').innerHTML = `<span class="cat-dot"></span>${card.catLabel}`;
+  document.getElementById('cardQuestion').textContent = card.q;
+  document.getElementById('cardAnswer').innerHTML = card.a;
+  document.getElementById('cardNumBadge').textContent = num;
+  document.getElementById('cardNumBadge2').textContent = num;
+
+  // progress
+  document.getElementById('progCurrent').textContent = currentIdx + 1;
+  document.getElementById('progTotal').textContent = deck.length;
+  document.getElementById('progPct').textContent = Math.round(((currentIdx) / deck.length) * 100) + '% complete';
+  document.getElementById('progressFill').style.width = Math.max(5, Math.round(((currentIdx + 1) / deck.length) * 100)) + '%';
+
+  document.getElementById('prevBtn').disabled = currentIdx === 0;
+  document.getElementById('nextBtn').disabled = currentIdx === deck.length - 1;
+}
+
+function flipCard() {
+  isFlipped = !isFlipped;
+  document.getElementById('flashcard').classList.toggle('flipped', isFlipped);
+}
+
+function nextCard() {
+  if (currentIdx < deck.length - 1) {
+    currentIdx++;
+    isFlipped = false;
+    document.getElementById('flashcard').classList.remove('flipped');
+    renderCard();
+  }
+}
+
+function prevCard() {
+  if (currentIdx > 0) {
+    currentIdx--;
+    isFlipped = false;
+    document.getElementById('flashcard').classList.remove('flipped');
+    renderCard();
+  }
+}
+
+function markCard(type) {
+  scores[type]++;
+  document.getElementById('knewCount').textContent = scores.knew;
+  document.getElementById('unsureCount').textContent = scores.unsure;
+  document.getElementById('missedCount').textContent = scores.missed;
+  if (currentIdx < deck.length - 1) nextCard();
+}
+
+function filterCategory(cat, el) {
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  deck = cat === 'all' ? [...allCards] : allCards.filter(c => c.category === cat);
+  currentIdx = 0;
+  isFlipped = false;
+  document.getElementById('flashcard').classList.remove('flipped');
+  renderCard();
+}
+
+function shuffleCards() {
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  currentIdx = 0;
+  isFlipped = false;
+  document.getElementById('flashcard').classList.remove('flipped');
+  renderCard();
+}
+
+renderCard();
+</script>
+</body>
+</html>
