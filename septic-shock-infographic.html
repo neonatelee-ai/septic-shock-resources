@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paediatric Septic Shock — Management Infographic</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red:    #C0392B;
+    --amber:  #E67E22;
+    --teal:   #1A7D6F;
+    --navy:   #0F2C4E;
+    --slate:  #2C3E50;
+    --cream:  #FDFAF6;
+    --pale:   #F4EFE8;
+    --gold:   #D4A843;
+    --muted:  #7F8C8D;
+    --white:  #FFFFFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--slate);
+    padding: 24px;
+    min-width: 900px;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--navy);
+    color: var(--white);
+    padding: 28px 36px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+  }
+  .header-badge {
+    background: var(--red);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    line-height: 1.15;
+    flex: 1;
+  }
+  .header-vitals {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .vital-chip {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .vital-chip span { color: var(--gold); }
+
+  /* ── VIGNETTE STRIP ── */
+  .vignette {
+    background: var(--pale);
+    border-left: 4px solid var(--amber);
+    padding: 14px 20px;
+    border-radius: 6px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--slate);
+  }
+  .vignette strong { color: var(--amber); }
+
+  /* ── RECOGNITION BOX ── */
+  .recognition {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .recog-card {
+    background: var(--white);
+    border-radius: 10px;
+    padding: 16px;
+    border-top: 3px solid var(--red);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .recog-card h3 {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+  .recog-card ul { list-style: none; }
+  .recog-card ul li {
+    font-size: 13px;
+    padding: 3px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .recog-card ul li::before {
+    content: '▸';
+    color: var(--red);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ── FLOW SECTION LABEL ── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    padding-left: 4px;
+  }
+
+  /* ── TIMELINE / STATES ── */
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 22px;
+    top: 44px;
+    bottom: 44px;
+    width: 3px;
+    background: linear-gradient(to bottom, var(--red), var(--amber), var(--teal));
+    border-radius: 3px;
+  }
+
+  .state-row {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 16px;
+    margin-bottom: 12px;
+    align-items: start;
+    position: relative;
+    z-index: 1;
+  }
+  .state-num {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800;
+    font-size: 16px;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    position: relative;
+    z-index: 2;
+  }
+  .state-card {
+    background: var(--white);
+    border-radius: 10px;
+    padding: 14px 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    border-left: 4px solid transparent;
+    position: relative;
+  }
+  .state-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .state-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px;
+    color: var(--navy);
+  }
+  .state-vitals { display: flex; gap: 8px; flex-wrap: wrap; }
+  .sv { 
+    background: var(--pale);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate);
+  }
+  .state-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .action-col h4, .trigger-col h4 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .action-col h4 { color: var(--teal); }
+  .trigger-col h4 { color: var(--amber); }
+  .action-col ul, .trigger-col ul { list-style: none; }
+  .action-col li, .trigger-col li {
+    font-size: 12.5px;
+    padding: 2px 0;
+    display: flex; gap: 6px; align-items: flex-start;
+    line-height: 1.4;
+  }
+  .action-col li::before { content: '✓'; color: var(--teal); flex-shrink: 0; font-weight: 700; }
+  .trigger-col li::before { content: '→'; color: var(--amber); flex-shrink: 0; font-weight: 700; }
+
+  /* state colours */
+  .s1 .state-num { background: var(--red); }
+  .s1 .state-card { border-left-color: var(--red); }
+  .s2 .state-num { background: #8B2FC9; }
+  .s2 .state-card { border-left-color: #8B2FC9; }
+  .s2 .action-col h4 { color: #8B2FC9; }
+  .s2 .action-col li::before { color: #8B2FC9; }
+  .s3 .state-num { background: var(--amber); }
+  .s3 .state-card { border-left-color: var(--amber); }
+  .s3 .action-col h4 { color: var(--amber); }
+  .s3 .action-col li::before { color: var(--amber); }
+  .s4 .state-num { background: #1565C0; }
+  .s4 .state-card { border-left-color: #1565C0; }
+  .s4 .action-col h4 { color: #1565C0; }
+  .s4 .action-col li::before { color: #1565C0; }
+  .s5 .state-num { background: var(--teal); }
+  .s5 .state-card { border-left-color: var(--teal); }
+
+  /* highlight pill */
+  .pill {
+    display: inline-block;
+    background: #FFF3CD;
+    border: 1px solid #FFC107;
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #6D4C00;
+  }
+  .pill-danger {
+    background: #FFE8E8;
+    border-color: var(--red);
+    color: var(--red);
+  }
+
+  /* ── BOTTOM ROW ── */
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .drug-box, .crm-box {
+    background: var(--white);
+    border-radius: 10px;
+    padding: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  }
+  .drug-box h3, .crm-box h3 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--pale);
+  }
+  .drug-box h3 { color: var(--teal); }
+  .crm-box h3 { color: #1565C0; }
+  .drug-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .drug-name { font-weight: 700; color: var(--navy); }
+  .drug-dose {
+    background: var(--pale);
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+    color: var(--slate);
+  }
+  .crm-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .crm-icon {
+    background: #E8F4FD;
+    color: #1565C0;
+    border-radius: 50%;
+    width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="header-badge">Emergency Management</div>
+    <h1>Paediatric Septic Shock<br><em style="font-size:18px;font-style:italic;font-weight:300;color:#a8c7e8;">Scenario-Based Clinical Algorithm</em></h1>
+  </div>
+  <div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:8px;letter-spacing:1px;text-transform:uppercase;">Patient: Rebecca, 4 yr · 20 kg</div>
+    <div class="header-vitals">
+      <div class="vital-chip">HR <span>140</span>/min</div>
+      <div class="vital-chip">BP <span>82/44</span></div>
+      <div class="vital-chip">RR <span>40</span>/min</div>
+      <div class="vital-chip">SpO₂ <span>91%</span></div>
+      <div class="vital-chip">Temp <span>39°C</span></div>
+      <div class="vital-chip">Glucose <span>2.4 mmol/L</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- VIGNETTE -->
+<div class="vignette">
+  <strong>Presentation:</strong> 4-year-old girl, 3 days of fever &amp; cough, now lethargic and "not herself." Glazed stare, tachypnoeic, tachycardic. Brought directly to resus. IV access unobtainable. Peripheral glucose critically low.
+</div>
+
+<!-- RECOGNITION -->
+<div class="section-label">Recognition — Signs of Septic Shock</div>
+<div class="recognition">
+  <div class="recog-card">
+    <h3>Cardiovascular</h3>
+    <ul>
+      <li>Tachycardia HR 140/min</li>
+      <li>Hypotension BP 82/44</li>
+      <li>Cap refill &gt;5 sec (central)</li>
+      <li>Sunken eyes / poor perfusion</li>
+    </ul>
+  </div>
+  <div class="recog-card">
+    <h3>Respiratory &amp; CNS</h3>
+    <ul>
+      <li>Tachypnoea RR 40/min</li>
+      <li>SpO₂ 91% on room air</li>
+      <li>Glazed, lethargic appearance</li>
+      <li>Altered level of consciousness</li>
+    </ul>
+  </div>
+  <div class="recog-card">
+    <h3>Metabolic</h3>
+    <ul>
+      <li>Fever 39°C (source: pneumonia)</li>
+      <li>Hypoglycaemia 2.4 mmol/L</li>
+      <li>No urine output today</li>
+      <li>Rhonchi right lung (CXR: pneumonia)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- TIMELINE -->
+<div class="section-label">Scenario Progression &amp; Key Decision Points</div>
+<div class="timeline">
+
+  <!-- STATE 1 -->
+  <div class="state-row s1">
+    <div class="state-num">1</div>
+    <div class="state-card">
+      <div class="state-header">
+        <div class="state-title">Baseline State — Initial Resuscitation</div>
+        <div class="state-vitals">
+          <span class="sv">HR 140</span>
+          <span class="sv">BP 82/44</span>
+          <span class="sv">SpO₂ 91%</span>
+        </div>
+      </div>
+      <div class="state-body">
+        <div class="action-col">
+          <h4>Actions Required</h4>
+          <ul>
+            <li>Attempt IV access (expect failure)</li>
+            <li><strong>Insert IO</strong> — do not delay beyond 2 min</li>
+            <li>Apply O₂ (non-rebreather mask)</li>
+            <li>Attach monitors: ECG, NIBP, SpO₂</li>
+            <li><span class="pill-danger">Check glucose NOW</span> — 2.4 mmol/L</li>
+            <li>Septic lab workup + CXR</li>
+            <li>Push <span class="pill">20 ml/kg × 3</span> = 400 ml per bolus</li>
+            <li>Antibiotics: Ceftriaxone 50 mg/kg IV</li>
+            <li>Take history from mother</li>
+          </ul>
+        </div>
+        <div class="trigger-col">
+          <h4>Consequences &amp; Triggers</h4>
+          <ul>
+            <li>No IO by 2 min → BP drops to 75/35</li>
+            <li>No glucose check by 4 min → STATE 2 (Seizure)</li>
+            <li>Glucose checked + fluids given → STATE 3</li>
+            <li>6 min elapsed → STATE 3</li>
+          </ul>
+          <div style="margin-top:10px;background:#FFF3CD;border-radius:6px;padding:8px 10px;font-size:12px;line-height:1.5;">
+            <strong>⚠ Glucose Replacement:</strong><br>
+            2–4 ml/kg of D25W = <strong>40–80 ml IO/IV</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATE 2 -->
+  <div class="state-row s2">
+    <div class="state-num">2</div>
+    <div class="state-card">
+      <div class="state-header">
+        <div class="state-title">Seizure — Hypoglycaemic Complication</div>
+        <div class="state-vitals">
+          <span class="sv">HR 155</span>
+          <span class="sv">BP 145/95</span>
+        </div>
+      </div>
+      <div class="state-body">
+        <div class="action-col">
+          <h4>Actions Required</h4>
+          <ul>
+            <li>Give glucose immediately (D25W 40–80 ml)</li>
+            <li>Do NOT reach for benzodiazepine first — treat cause</li>
+            <li>Ensure staff in droplet precautions (masks)</li>
+            <li>Consider adding Vancomycin (CSF penetration)</li>
+            <li>Delegate team member: support/inform mother</li>
+          </ul>
+        </div>
+        <div class="trigger-col">
+          <h4>Consequences &amp; Triggers</h4>
+          <ul>
+            <li>Benzo given → seizure does NOT stop (glucose is cause)</li>
+            <li>Glucose given → STATE 3</li>
+            <li>8 min elapsed → STATE 3</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATE 3 -->
+  <div class="state-row s3">
+    <div class="state-num">3</div>
+    <div class="state-card">
+      <div class="state-header">
+        <div class="state-title">Persistent Hypotension — Vasopressor Decision</div>
+        <div class="state-vitals">
+          <span class="sv">HR 130</span>
+          <span class="sv">BP 75/35</span>
+        </div>
+      </div>
+      <div class="state-body">
+        <div class="action-col">
+          <h4>Actions Required</h4>
+          <ul>
+            <li>Continue fluid boluses up to total <span class="pill">60 ml/kg</span></li>
+            <li>Start vasopressor via IO</li>
+            <li>Epinephrine 0.05 mcg/kg/min <em>or</em></li>
+            <li>Norepinephrine 0.05 mcg/kg/min</li>
+            <li>Consult ICU</li>
+            <li>Consider intubation for altered LOC</li>
+          </ul>
+        </div>
+        <div class="trigger-col">
+          <h4>Consequences &amp; Triggers</h4>
+          <ul>
+            <li>No pressor by 9 min → BP 70/30</li>
+            <li>No pressor by 10 min → BP 65/25</li>
+            <li>Pressor started → STATE 4</li>
+            <li>Intubation decision → STATE 5</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATE 4 -->
+  <div class="state-row s4">
+    <div class="state-num">4</div>
+    <div class="state-card">
+      <div class="state-header">
+        <div class="state-title">Poorly Responsive — Intubation Planning</div>
+        <div class="state-vitals">
+          <span class="sv">HR 120</span>
+          <span class="sv">BP 85/45</span>
+          <span class="sv">LOC ↓↓</span>
+        </div>
+      </div>
+      <div class="state-body">
+        <div class="action-col">
+          <h4>Actions Required</h4>
+          <ul>
+            <li>Commit to intubation decision</li>
+            <li>Tube size: <span class="pill">5.0 uncuffed</span> or <span class="pill">4.5 cuffed</span></li>
+            <li>Induction: Ketamine or Etomidate</li>
+            <li>Paralytic agent</li>
+            <li>Apnoeic oxygenation</li>
+          </ul>
+        </div>
+        <div class="trigger-col">
+          <h4>Consequences &amp; Triggers</h4>
+          <ul>
+            <li>No intubation decision → SpO₂ falls to 85%</li>
+            <li>Intubation → STATE 5</li>
+          </ul>
+          <div style="margin-top:10px;background:#E3F2FD;border-radius:6px;padding:8px 10px;font-size:12px;line-height:1.5;">
+            <strong>Tube sizing (paediatric):</strong><br>
+            Uncuffed: (Age/4) + 4 = <strong>5.0</strong><br>
+            Cuffed: (Age/4) + 3.5 = <strong>4.5</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATE 5 -->
+  <div class="state-row s5">
+    <div class="state-num">5</div>
+    <div class="state-card">
+      <div class="state-header">
+        <div class="state-title">Intubation &amp; Post-Intubation Care</div>
+        <div class="state-vitals">
+          <span class="sv">RR→0 after paralytic</span>
+        </div>
+      </div>
+      <div class="state-body">
+        <div class="action-col">
+          <h4>Actions Required</h4>
+          <ul>
+            <li>Intubate (as planned above)</li>
+            <li>Confirm with post-intubation CXR</li>
+            <li>Start sedation: Midazolam</li>
+            <li>Insert orogastric tube (OG)</li>
+            <li>Call ICU for transfer</li>
+          </ul>
+        </div>
+        <div class="trigger-col">
+          <h4>End Points</h4>
+          <ul>
+            <li>Successful intubation → END CASE</li>
+            <li>12 minutes elapsed → END CASE</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM ROW -->
+<div class="bottom-row">
+  <div class="drug-box">
+    <h3>🧪 Drug Reference — Weight 20 kg</h3>
+    <div class="drug-row">
+      <div class="drug-name">Ceftriaxone</div>
+      <div class="drug-dose">50 mg/kg = 1000 mg IV</div>
+    </div>
+    <div class="drug-row">
+      <div class="drug-name">D25W (glucose)</div>
+      <div class="drug-dose">2–4 ml/kg = 40–80 ml IO/IV</div>
+    </div>
+    <div class="drug-row">
+      <div class="drug-name">Fluid bolus</div>
+      <div class="drug-dose">20 ml/kg = 400 ml (×3 max 60 ml/kg)</div>
+    </div>
+    <div class="drug-row">
+      <div class="drug-name">Epinephrine</div>
+      <div class="drug-dose">0.05 mcg/kg/min infusion</div>
+    </div>
+    <div class="drug-row">
+      <div class="drug-name">Norepinephrine</div>
+      <div class="drug-dose">0.05 mcg/kg/min infusion</div>
+    </div>
+    <div class="drug-row">
+      <div class="drug-name">Midazolam (post-intub.)</div>
+      <div class="drug-dose">Titrate per institutional protocol</div>
+    </div>
+    <div class="drug-row">
+      <div class="drug-name">Vancomycin (if meningitis)</div>
+      <div class="drug-dose">Consider for CSF penetration</div>
+    </div>
+  </div>
+
+  <div class="crm-box">
+    <h3>👥 Crisis Resource Management</h3>
+    <div class="crm-item">
+      <div class="crm-icon">📢</div>
+      <div><strong>Clear communication:</strong> Verbalise all orders and drug doses. Close the loop — receiver repeats back before administration.</div>
+    </div>
+    <div class="crm-item">
+      <div class="crm-icon">👩</div>
+      <div><strong>Distraught parent:</strong> Designate one team member solely to support and update the mother. Remove from procedural area if necessary.</div>
+    </div>
+    <div class="crm-item">
+      <div class="crm-icon">💉</div>
+      <div><strong>IO access:</strong> Do not persist with IV beyond 2 minutes in a critically unwell child. IO is safe, fast and effective.</div>
+    </div>
+    <div class="crm-item">
+      <div class="crm-icon">🧮</div>
+      <div><strong>Weight estimation:</strong> Use Broselow tape or formula: weight = 2 × (age + 4) = <strong>16 kg</strong> (actual 20 kg — use actual if known).</div>
+    </div>
+    <div class="crm-item">
+      <div class="crm-icon">🔄</div>
+      <div><strong>Reassess frequently:</strong> Vital signs, LOC, and glucose must be re-checked after every intervention.</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Based on EMSimCases.com Paediatric Septic Shock scenario · Kyla Caners, McMaster University · CC BY-SA 4.0
+</div>
+
+</body>
+</html>
